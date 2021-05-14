@@ -116,8 +116,8 @@ function sol = ChimeraModel(params,domain,ins)
         
         for k = 0:nmodels-1
             N_q = sum(M([2,5:6,8,10,12,13:16,22:23]+k*23, i));   % Total population in quarantine
-            H_f(k+1) = sum(M(7+j*23, i));                                  % Free infected
-            L_f(k+1) = sum(M([9+j*23,11+j*23], i));                  % Free asymptomatic
+            H_f(k+1) = sum(M(7+k*23, i));                                  % Free infected
+            L_f(k+1) = sum(M([9+k*23,11+k*23], i));                  % Free asymptomatic
             N_t = N_t+N_q; % Total population 
             tota(k+1) = sum(M(7+k*23:16+k*23, i)); % Total infectious
             C = C + sum(M([1:18,22:23]+k*23,1))*k_L(k+1);          % Max virus concentration
