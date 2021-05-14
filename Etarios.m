@@ -154,45 +154,21 @@ out_names_tot = cellstr(out_names_tot(:))';
 T.Properties.CustomProperties.output = outs;
 xdata = 0:d - 1;
 Solver = 'fmincon';
-Opt = optimoptions('fmincon','UseParallel',false,'MaxFunctionEvaluations',300, ...
-    'MaxIterations', 1000, 'Display','iter');
+% Opt = optimoptions('fmincon','UseParallel',true,'MaxFunctionEvaluations',300000, ...
+%     'MaxIterations', 10000, 'Display','iter');
 
-% N = 4;                    % Number of estimations
-% Best = zeros(size(T,1),N);  % Matrix that saves factor's estimated values
-% IpBest = Best;              % Matrix that saves optimization method initial point
-% Residual = zeros(1,N);      % Vector that saves estimations cost function value
-% ResBase = 12e-2;            % Pre-defined cost function value
-% 
-% ResTemp = 5e8;
-% while ResTemp > ResBase
-%     [T_est, ResTemp, IP] = gsua_pe(T,xdata,ydata,...
-%         'solver',Solver,'N',1,'opt',Opt,'save',false);
-% end
+Opt = optimoptions('fmincon','UseParallel',true,'MaxFunctionEvaluations',3000, ...
+    'MaxIterations', 100, 'Display','iter');
 
-%Sort the estimated values according its cost function value
-% [Residual, Idx] = sort(Residual);
-% T.Est = Best(:, Idx);
-% IpBest = IpBest(:,Idx);
+% p = parpool(str2double(getenv('SLURM_NTASKS')));
 
-% T.Est = T_est;
-% 
-% gsua_save(T)
-% movefile("portable.mat", "Results/ChimeraEstimations.mat");
-% save('Results/ChimeraEstimationsData.mat',...
-%     'ydata','Residual','IpBest')
+[T_est, res] = gsua_pe(T,xdata,ydata,'solver',Solver,'N',1,'opt',Opt,'save',false);
 
-% T_est = load('T_est');
-[T_est, ResTemp, IP] = gsua_pe(T,xdata,ydata,'solver',Solver,'N',1,'opt',Opt,'save',false);
+Param_est = T_est.Estfmincon;
+
+save('Estimacion', 'Param_est', 'ydata', 'xdata', 'res')
+movefile('Estimacion.mat', 'Results/ChimeraEstimations.mat');
+% est = load('Estimacion.mat');
 
 figure
-gsua_eval(T.Nominal, T, 1:length(ydata), ydata);
-figure
-gsua_eval(T.Range(:,1), T, 1:length(ydata), ydata);
-figure
-gsua_eval(T.Range(:,2), T, 1:length(ydata), ydata);
-figure
-gsua_eval(T_est.Estfmincon(:,end), T, 1:length(ydata), ydata);
-
-% T_est = gsua_load(T);
-% figure
-% gsua_eval(T.Est,T_est,xdata,ydata);
+gsua_eval(Param_est, T, 1:length(ydata), ydata);
